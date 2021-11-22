@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -27,25 +28,46 @@ func (i *stringListFlags) Set(value string) error {
 var (
 	url       string = "https://countries.trevorblades.com/"
 	query     string = `query ($code:String!="US"){countries(filter:{code:{eq:$code}}){ capital name continent {name}}}`
+	queryfile string
 	headers   stringListFlags
 	variables stringListFlags
 	debug     bool
 )
 
 func init() {
+
+	if v := os.Getenv("GRAPHQL_QUERYFILE"); v != "" {
+		log.Printf("Setting queryfile from env")
+		queryfile = v
+	}
 	if v := os.Getenv("GRAPHQL_QUERY"); v != "" {
+		log.Printf("Setting query from env")
 		query = v
 	}
 	if v := os.Getenv("GRAPHQL_URL"); v != "" {
+		log.Printf("Setting URL from env")
 		url = v
 	}
 	flag.StringVar(&url, "url", url, "Graphql server URL (or GRAPHQL_URL from env)")
 	flag.StringVar(&query, "query", query, "Graphql query (or GRAPHQL_QUERY from env)")
+	flag.StringVar(&queryfile, "queryfile", queryfile, "File containing graphql query (or GRAPHQL_QUERYFILE from env)")
 	flag.Var(&headers, "header", "HTTP Header (key: value)")
 	flag.Var(&variables, "var", "GraphQL variable (key=value)")
 	flag.BoolVar(&debug, "debug", debug, "Debugging")
 	flag.Parse()
+
+	if queryfile != "" {
+		if debug {
+			log.Printf("Reading query from file %s\n", queryfile)
+		}
+		if buf, err := ioutil.ReadFile(queryfile); err != nil {
+			log.Fatalf("Cannot open file %s: %s\n", queryfile, err.Error())
+		} else {
+			query = string(buf)
+		}
+	}
 }
+
 func main() {
 	if debug {
 		log.Printf("URL: %s\nQuery: %s\n", url, query)
@@ -88,7 +110,11 @@ func main() {
 	if err := client.Run(ctx, req, &respData); err != nil {
 		log.Fatal(err)
 	}
-	resp, _ := json.MarshalIndent(respData, "", "  ")
 
-	fmt.Printf("%s\n", string(resp))
+	if resp, err := json.MarshalIndent(respData, "", "  "); err != nil {
+		log.Fatal(err)
+	} else {
+		fmt.Printf("%s\n", string(resp))
+	}
+
 }
