@@ -8,7 +8,7 @@ Command -line graphql client written in golang. Based on https://github.com/mach
 # Usage
 
 ```
-Usage of ./go-graphql-cli:
+Usage of go-graphql-cli:
   -debug
     	Debugging
   -header value
@@ -22,7 +22,7 @@ Usage of ./go-graphql-cli:
 ```
 Example:
 ```
-./go-graphql-cli -var code=PL
+go-graphql-cli -var code=PL
 {
   "countries": [
     {
