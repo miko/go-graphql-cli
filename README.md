@@ -1,6 +1,10 @@
 # go-graphql-cli
 Command -line graphql client written in golang. Based on https://github.com/machinebox/graphql.
 
+# Installation
+
+`go install github.com/miko/go-graphql-cli`
+
 # Usage
 
 ```
