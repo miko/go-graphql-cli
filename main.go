@@ -26,12 +26,13 @@ func (i *stringListFlags) Set(value string) error {
 }
 
 var (
-	url       string = "https://countries.trevorblades.com/"
-	query     string = `query ($code:String!="US"){countries(filter:{code:{eq:$code}}){ capital name continent {name}}}`
-	queryfile string
-	headers   stringListFlags
-	variables stringListFlags
-	debug     bool
+	url           string = "https://countries.trevorblades.com/"
+	query         string = `query ($code:String!="US"){countries(filter:{code:{eq:$code}}){ capital name continent {name}}}`
+	queryfile     string
+	headers       stringListFlags
+	variables     stringListFlags
+	filevariables stringListFlags
+	debug         bool
 )
 
 func init() {
@@ -53,6 +54,7 @@ func init() {
 	flag.StringVar(&queryfile, "queryfile", queryfile, "File containing graphql query (or GRAPHQL_QUERYFILE from env)")
 	flag.Var(&headers, "header", "HTTP Header (key: value)")
 	flag.Var(&variables, "var", "GraphQL variable (key=value)")
+	flag.Var(&filevariables, "filevar", "GraphQL variable read from file (key=filename)")
 	flag.BoolVar(&debug, "debug", debug, "Debugging")
 	flag.Parse()
 
@@ -87,6 +89,30 @@ func main() {
 			req.Var(key, value)
 		} else {
 			log.Printf("WARN: bad variable string %s, needs key=value\n", v)
+		}
+	}
+
+	for k, v := range filevariables {
+		s := strings.Split(v, "=")
+		if len(s) > 1 {
+			key := s[0]
+			value := strings.Join(s[1:], "=")
+			if debug {
+				log.Printf("[%d] Reading variable %s from file %s\n", k, key, value)
+			}
+			if b, err := ioutil.ReadFile(value); err != nil {
+				log.Fatalf("Cannot read variable from file %s: %s", value, err.Error())
+			} else {
+				var x interface{}
+				json.Unmarshal(b, &x)
+				req.Var(key, x)
+				if debug {
+					log.Printf("[%d] Setting variable %s to %s\n", k, key, string(b))
+				}
+				req.Var(key, x)
+			}
+		} else {
+			log.Printf("WARN: bad variable string %s, needs key=filename\n", v)
 		}
 	}
 
