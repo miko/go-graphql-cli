@@ -14,15 +14,17 @@ Usage of go-graphql-cli:
   -header value
     	HTTP Header (key: value)
   -query string
-    	Graphql query (default "query ($code:String!=\"US\"){countries(filter:{code:{eq:$code}}){ capital name continent {name}}}")
+    	Graphql query (or GRAPHQL_QUERY from env) (default "query ($code:String!=\"US\"){countries(filter:{code:{eq:$code}}){ capital name continent {name}}}")
   -url string
-    	Graphql server URL (default "https://countries.trevorblades.com/")
+    	Graphql server URL (or GRAPHQL_URL from env) (default "https://countries.trevorblades.com/")
   -var value
     	GraphQL variable (key=value)
 ```
 Example:
 ```
-go-graphql-cli -var code=PL
+$ export GRAPHQL_URL=https://countries.trevorblades.com/
+$ export GRAPHQL_QUERY='query ($code:String!="US"){countries(filter:{code:{eq:$code}}){ capital name continent {name}}}'
+$ go-graphql-cli -var code=PL
 {
   "countries": [
     {

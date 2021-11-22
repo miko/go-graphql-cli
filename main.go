@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/machinebox/graphql"
@@ -32,8 +33,14 @@ var (
 )
 
 func init() {
-	flag.StringVar(&url, "url", url, "Graphql server URL")
-	flag.StringVar(&query, "query", query, "Graphql query")
+	if v := os.Getenv("GRAPHQL_QUERY"); v != "" {
+		query = v
+	}
+	if v := os.Getenv("GRAPHQL_URL"); v != "" {
+		url = v
+	}
+	flag.StringVar(&url, "url", url, "Graphql server URL (or GRAPHQL_URL from env)")
+	flag.StringVar(&query, "query", query, "Graphql query (or GRAPHQL_QUERY from env)")
 	flag.Var(&headers, "header", "HTTP Header (key: value)")
 	flag.Var(&variables, "var", "GraphQL variable (key=value)")
 	flag.BoolVar(&debug, "debug", debug, "Debugging")
