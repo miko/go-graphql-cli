@@ -39,12 +39,12 @@ $ go-graphql-cli -var code=PL
 
 $ go-graphql-cli -var user=john -var password=pass -query 'query Login($login:String!, $password:String!) {login(login:$login,password:$password) {first_name last_name}}'
 {
-  "login": [
+  "login": 
     {
       "first_name": "John",
       "last_name": "Doe"
     }
-  ]
+  
 }
 
 ```
